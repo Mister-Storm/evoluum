@@ -1,12 +1,17 @@
 package com.evoluum.service;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -18,6 +23,7 @@ import com.evoluum.model.CidadeReturnApi;
 import com.evoluum.model.Uf;
 import com.evoluum.repository.BuscadorDeCidadesRepository;
 import com.evoluum.repository.BuscadorDeEstadosRepository;
+import com.evoluum.utils.CriaCsv;
 import com.evoluum.utils.Mapper;
 
 @Service
@@ -56,28 +62,10 @@ public class ListaCidadesService {
 		return cidadeReturn.isPresent() ? cidadeReturn.get().getId() : null;
 	}
 
-	public OutputStream geraCsv() {
+	public OutputStream geraCsv() throws IOException {
 		List<CidadeReturnApi> cidades = listaTodasAsCidadesDoPais();
-		File targetFile = new File("src/main/resources/targetFile.tmp");
-		OutputStream outStream = null;
-		try {
-			outStream = new FileOutputStream(targetFile);
-			outStream.write("idEstado, siglaEstado, regiaoNome, nomeCidade, nomeMesorregiao, nomeFormatado".getBytes());
-
-			for(CidadeReturnApi cidade : cidades) {
-				String line = cidade.getIdEstado().toString() + ", " + cidade.getSiglaEstado() + ", "
-						+ cidade.getRegiaoNome() + ", " + cidade.getNomeCidade() + ", " + cidade.getNomeMesorregiao()
-						+ ", " + cidade.getNomeFormatado();
-				try {
-					outStream.write(line.getBytes());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return outStream;
+		OutputStream outStream = new FileOutputStream(CriaCsv.criarCsv(cidades));
+			return outStream;	
 	}
+	
 }

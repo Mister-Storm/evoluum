@@ -1,57 +1,46 @@
 package com.evoluum.controller;
 
-import java.io.OutputStream;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import com.evoluum.utils.ResponseMessages;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
-import com.evoluum.model.CidadeReturnApi;
-import com.evoluum.service.ListaCidadesService;
+import java.io.IOException;
 
-@RestController
-@RequestMapping(value=ListaCidadesController.URL)
+@Api(tags = "Appointment controller")
+public interface ListaCidadesController {
 
-public class ListaCidadesController {
+	@ApiOperation(value = "Retorna um Json com todos os municípios do Brasil.")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200,
+					message = ResponseMessages.OK_200),
+			@ApiResponse(code = 400,
+					message = ResponseMessages.BAD_REQUEST_400),
+			@ApiResponse(code = 404, message = ResponseMessages.NOT_FOUND_404)
+	})
+	ResponseEntity<?> geraJsonTodosMunicípios();
 
-	@Value("${url.municipios}")
-	String url2;
-	
-	@Autowired
-	private ListaCidadesService service;
-	
-	public static final String URL = "v1/cidades";
-	
-	@RequestMapping(value = "/json", method=RequestMethod.GET)
-	public ResponseEntity<?> geraJsonTodosMunicípios() {
-		List<CidadeReturnApi> cidades = service.listaTodasAsCidadesDoPais();
-		HttpStatus status = cidades.isEmpty() ? HttpStatus.NOT_FOUND : HttpStatus.OK;
-	
-		return new ResponseEntity<>(cidades, status);
-	}
-	
-	@RequestMapping(value = "/json/", method=RequestMethod.GET)
-	@Cacheable(value="nome")
-	public ResponseEntity<?> geraJsonMunicípio(@RequestParam String nomeCidade) {
-		Integer cidadeId= service.encontraCidade(nomeCidade);
-		HttpStatus status = cidadeId != null ? HttpStatus.OK : HttpStatus.NOT_FOUND;
-	
-		return new ResponseEntity<>(cidadeId != null ? cidadeId : "Cidade não encontrada", status);
-	}
-	
-	@RequestMapping(value = "/csv", method=RequestMethod.GET)
-	public ResponseEntity<?> geraCsvMunicípio() {
-	
-		return new ResponseEntity<>(service.geraCsv(), HttpStatus.OK);
-	}
+	@ApiOperation(value = "Retorna o id correspondente ao município.")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200,
+					message = ResponseMessages.OK_200),
+			@ApiResponse(code = 400,
+					message = ResponseMessages.BAD_REQUEST_400),
+			@ApiResponse(code = 404, message = ResponseMessages.NOT_FOUND_404)
+	})
+	ResponseEntity<?> geraJsonMunicípio(@RequestParam String nomeCidade);
+
+	@ApiOperation(value = "Retorna um Json com todos os municípios do Brasil.")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200,
+					message = ResponseMessages.OK_200),
+			@ApiResponse(code = 400,
+					message = ResponseMessages.BAD_REQUEST_400),
+			@ApiResponse(code = 404, message = ResponseMessages.NOT_FOUND_404)
+	})
+	ResponseEntity<?> geraCsvMunicípio() throws IOException;
+
 }
